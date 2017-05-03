@@ -12,6 +12,7 @@ my @mount_consts = qw/MS_RDONLY MS_NOSUID MS_NODEV MS_NOEXEC MS_SYNCHRONOUS MS_R
 our @EXPORT_OK = (@mount_consts, qw/mount/);
 
 our %EXPORT_TAGS = (
+  'consts' => \@mount_consts,
   'all' => [@mount_consts, qw/mount/],
 );
 

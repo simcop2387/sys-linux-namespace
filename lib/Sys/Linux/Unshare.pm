@@ -12,7 +12,8 @@ my @unshare_consts = qw/CSIGNAL CLONE_VM CLONE_FS CLONE_FILES CLONE_SIGHAND CLON
 our @EXPORT_OK = (@unshare_consts, qw/unshare/);
 
 our %EXPORT_TAGS = (
-  'all' => [@unshare_consts, qw/unshare/],
+    'consts' => \@unshare_consts,
+    'all' => [@unshare_consts, qw/unshare/],
 );
 
 sub unshare {
