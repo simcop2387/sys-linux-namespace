@@ -24,8 +24,7 @@ sub unshare {
 
 
     local $! = 0;
-    ### FIXME XXX HACK FUCK YOU = 272 unshare syscall number on x86_64
-    my $ret = syscall(SYS_unshare(), $flags);
+    my $ret = _unshare_sys($flags);
 
     if ($ret != 0) {
         die "unshare failed $ret $!";

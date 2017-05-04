@@ -12,12 +12,11 @@ PROTOTYPES: ENABLE
  # XS comments begin with " #" to avoid them being interpreted as pre-processor
  # directives
  
-int 
-_unshare_sys(source, target, filesystem, mount, data)
+int _mount_sys(source, target, filesystem, mountflags, data)
 const char *source
 const char *target
 const char *filesystem
 unsigned long mountflags
 const char *data
 	CODE:
-	return mount(source, target, filesystem, mount, (const void *) data);
+	RETVAL = mount(source, target, filesystem, mountflags, (const void *) data);

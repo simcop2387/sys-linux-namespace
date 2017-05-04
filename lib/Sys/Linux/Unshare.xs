@@ -19,5 +19,5 @@ int
 _unshare_sys(flags)
 int flags
 	CODE:
-	return unshare(flags);
+	RETVAL = unshare(flags);
 
