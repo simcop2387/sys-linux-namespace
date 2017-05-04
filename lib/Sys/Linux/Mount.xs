@@ -12,11 +12,7 @@ PROTOTYPES: ENABLE
  # XS comments begin with " #" to avoid them being interpreted as pre-processor
  # directives
  
-int _mount_sys(source, target, filesystem, mountflags, data)
-const char *source
-const char *target
-const char *filesystem
-unsigned long mountflags
-const char *data
+SV *_mount_sys(const char *source, const char *target, const char *filesystem, unsigned long mountflags, const char *data)
 	CODE:
-	RETVAL = mount(source, target, filesystem, mountflags, (const void *) data);
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), mount(source, target, filesystem, mountflags, (const void *) data));

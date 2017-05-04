@@ -15,9 +15,8 @@ PROTOTYPES: ENABLE
  # XS comments begin with " #" to avoid them being interpreted as pre-processor
  # directives
  
-int 
-_unshare_sys(flags)
-int flags
+SV * _unshare_sys(int flags)
 	CODE:
-	RETVAL = unshare(flags);
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), unshare(flags));
 
