@@ -85,7 +85,9 @@ sub namespace {
     } else {
         unshare($uflags);
         $post_setup->();
-    }
+    };
+
+    return 1;
 }
 
 1;

@@ -22,7 +22,7 @@ sub mount {
 
     my $options_str = join ',', map {"$_=".$options_hr->{$_}} keys %$options_hr;
 
-    my $ret = _mount_sys($source, $target, $filesystem//undef, $flags, $options_str);
+    my $ret = _mount_sys($source//"", $target//"", $filesystem//"", $flags//0, $options_str//"");
 
     if ($ret != 0) {
         die "mount failed: $ret $!";
