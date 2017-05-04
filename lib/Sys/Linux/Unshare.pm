@@ -1,11 +1,16 @@
 package Sys::Linux::Unshare;
 
-use strict;
+#use strict;
 use warnings;
+use Data::Dumper;
 require Exporter;
 our @ISA = qw/Exporter/;
 
-require 'syscall.ph';
+BEGIN {
+  # Force reloading of all .ph files
+  delete $INC{$_} for (grep {/\.ph$/} keys %INC);
+  require 'syscall.ph';
+}
 
 my @unshare_consts = qw/CSIGNAL CLONE_VM CLONE_FS CLONE_FILES CLONE_SIGHAND CLONE_PTRACE CLONE_VFORK CLONE_PARENT CLONE_THREAD CLONE_NEWNS CLONE_SYSVSEM CLONE_SETTLS CLONE_PARENT_SETTID CLONE_CHILD_CLEARTID CLONE_DETACHED CLONE_UNTRACED CLONE_CHILD_SETTID CLONE_NEWCGROUP CLONE_NEWUTS CLONE_NEWIPC CLONE_NEWUSER CLONE_NEWPID CLONE_NEWNET CLONE_IO/;
 
@@ -19,6 +24,9 @@ our %EXPORT_TAGS = (
 sub unshare {
     my ($flags) = @_;
 
+
+    local $! = 0;
+    ### FIXME XXX HACK FUCK YOU = 272 unshare syscall number on x86_64
     my $ret = syscall(SYS_unshare(), $flags);
 
     if ($ret != 0) {

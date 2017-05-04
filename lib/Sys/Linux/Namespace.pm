@@ -7,6 +7,11 @@ use Sys::Linux::Mount qw/:all/;
 use Sys::Linux::Unshare qw/:all/;
 use POSIX qw/_exit/;
 
+require Exporter;
+our @ISA = qw/Exporter/;
+
+our @EXPORT_OK=qw/namespace/;
+
 sub namespace {
     my ($options) = @_;
 
@@ -25,6 +30,7 @@ sub namespace {
             } elsif (ref $options->{private_tmp}) {
                 die "Bad ref type passed as private_tmp";
             } else {
+                mount("/tmp", "/tmp", "tmpfs", 0, undef);
                 mount("/tmp", "/tmp", "tmpfs", MS_PRIVATE, undef);
             }
         }
@@ -48,9 +54,9 @@ sub namespace {
       my $mid_pid = fork();
 
       unless($mid_pid == -1) {
-          if($mid_pid) {
+          if ($mid_pid) {
             # Original Process
-            waitpid($mid_pid); # WE MUST BLOCK
+            waitpid($mid_pid, 0); # WE MUST BLOCK
             return; # don't run anything else in here
           } else {
             # Middle child process
@@ -60,7 +66,7 @@ sub namespace {
 
             unless($child_pid == -1) {
               if ($child_pid) {
-                waitpid($child_pid);
+                waitpid($child_pid, 0);
               } else {
                 $options->{pid}->();
               }
@@ -80,3 +86,5 @@ sub namespace {
         $post_setup->();
     }
 }
+
+1;

@@ -5,7 +5,11 @@ use warnings;
 require Exporter;
 our @ISA = qw/Exporter/;
 
-require 'syscall.ph';
+BEGIN {
+  # Force reloading of all .ph files
+  delete $INC{$_} for (grep {/\.ph$/} keys %INC);
+  require 'syscall.ph';
+}
 
 my @mount_consts = qw/MS_RDONLY MS_NOSUID MS_NODEV MS_NOEXEC MS_SYNCHRONOUS MS_REMOUNT MS_MANDLOCK MS_DIRSYNC MS_NOATIME MS_NODIRATIME MS_BIND MS_MOVE MS_REC MS_SILENT MS_POSIXACL MS_UNBINDABLE MS_PRIVATE MS_SLAVE MS_SHARED MS_RELATIME MS_KERNMOUNT MS_I_VERSION MS_STRICTATIME MS_LAZYTIME MS_ACTIVE MS_NOUSER/;
 
@@ -21,7 +25,7 @@ sub mount {
 
     my $options_str = join ',', map {"$_=".$options_hr->{$_}} keys %$options_hr;
 
-    my $ret = syscall(SYS_mount(), $source, $target, $filesystem, $flags, $options_str);
+    my $ret = syscall(SYS_mount(), $source, $target, $filesystem//undef, $flags, $options_str);
 
     if ($ret != 0) {
         die "mount failed: $ret $!";
