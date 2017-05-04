@@ -2,6 +2,8 @@ package Sys::Linux::Mount;
 
 use strict;
 use warnings;
+use Carp qw/carp/;
+
 require Exporter;
 our @ISA = qw/Exporter/;
 require XSLoader;
@@ -10,25 +12,34 @@ XSLoader::load();
 
 my @mount_consts = qw/MS_RDONLY MS_NOSUID MS_NODEV MS_NOEXEC MS_SYNCHRONOUS MS_REMOUNT MS_MANDLOCK MS_DIRSYNC MS_NOATIME MS_NODIRATIME MS_BIND MS_MOVE MS_REC MS_SILENT MS_POSIXACL MS_UNBINDABLE MS_PRIVATE MS_SLAVE MS_SHARED MS_RELATIME MS_KERNMOUNT MS_I_VERSION MS_STRICTATIME MS_LAZYTIME MS_ACTIVE MS_NOUSER/;
 
-our @EXPORT_OK = (@mount_consts, qw/mount/);
+our @EXPORT_OK = (@mount_consts, qw/mount umount/);
 
 our %EXPORT_TAGS = (
   'consts' => \@mount_consts,
-  'all' => [@mount_consts, qw/mount/],
+  'all' => [@mount_consts, qw/mount umount/],
 );
 
 sub mount {
-    my ($source, $target, $filesystem, $flags, $options_hr) = @_;
+  my ($source, $target, $filesystem, $flags, $options_hr) = @_;
 
-    my $options_str = join ',', map {"$_=".$options_hr->{$_}} keys %$options_hr;
+  my $options_str = join ',', map {"$_=".$options_hr->{$_}} keys %$options_hr;
 
-    my $ret = _mount_sys($source//"", $target//"", $filesystem//"", $flags//0, $options_str//"");
+  my $ret = _mount_sys($source//"", $target//"", $filesystem//"", $flags//0, $options_str//"");
 
-    if ($ret != 0) {
-        die "mount failed: $ret $!";
-    }
+  if ($ret != 0) {
+      carp "mount failed: $ret $!";
+  }
 
-    return;
+  return 1;
+}
+
+sub umount {
+  my ($target) = @_;
+
+  carp "No argument given to umount()" unless $target;
+
+  my $ret = _umount_sys($target);
+  return 1;
 }
 
 use constant {MS_RDONLY => 1,        

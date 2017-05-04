@@ -16,3 +16,8 @@ SV *_mount_sys(const char *source, const char *target, const char *filesystem, u
 	CODE:
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), mount(source, target, filesystem, mountflags, (const void *) data));
+
+SV *_umount_sys(const char *target)
+	CODE:
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), umount(target));
