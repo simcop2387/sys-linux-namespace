@@ -72,7 +72,7 @@ sub post_setup {
     my $data = undef;
     $data = $self->private_tmp if (ref $self->private_tmp eq 'HASH');
 
-    mount("none", "/tmp", "tmpfs", 0, undef);
+    mount("none", "/tmp", "tmpfs", MS_MGC_VAL, undef);
     mount("none", "/tmp", "tmpfs", MS_PRIVATE, $data);
   }
 
@@ -104,14 +104,18 @@ sub run {
   croak "Run must be given a codref to run" unless ref $code eq "CODE";
 
   $self->_subprocess(sub {
-    $self->setup(%args);
+    $self->pre_setup(%args);
+    my $uflags = $self->_uflags;
+    unshare($uflags);
 
     # We've just unshared, if we wanted a private pid space we MUST fork again.
     if ($self->private_pid) {
       $self->_subprocess(sub {
+        $self->post_setup(%args);
         $code->(%args);
       }, %args);
     } else {
+      $self->setup(%args);
       $code->(%args);
     }
   }, %args);

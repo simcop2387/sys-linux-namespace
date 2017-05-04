@@ -50,12 +50,12 @@ our %EXPORT_TAGS = (
 sub mount {
   my ($source, $target, $filesystem, $flags, $options_hr) = @_;
 
-  my $options_str; 
+  my $options_str = ""; 
   if ($options_hr) {
     $options_str = join ',', map {"$_=".$options_hr->{$_}} keys %$options_hr;
   }
 
-  my $ret = _mount_sys($source, $target, $filesystem, $flags//0xc0ed0000, $options_str);
+  my $ret = _mount_sys($source//"", $target//"", $filesystem//"", $flags//0xc0ed0000, $options_str);
 
   if ($ret != 0) {
       croak "mount failed: $ret $!";

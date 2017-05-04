@@ -6,7 +6,7 @@ use Test::More;
 use Test::SharedFork;
 
 # test 1
-use_ok("Sys::Linux::Namespace");
+use Sys::Linux::Namespace;
 
 # test 2
 SKIP: {
