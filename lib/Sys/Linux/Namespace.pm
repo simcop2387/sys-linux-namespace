@@ -11,8 +11,6 @@ use POSIX qw/_exit/;
 use Moo;
 use Carp qw/croak/;
 
-use Data::Dumper;
-
 has no_proc => (is => 'rw');
 
 for my $p (qw/tmp mount pid net ipc user uts sysvsem/) {
@@ -56,7 +54,6 @@ sub pre_setup {
 
   croak "Private net is not yet supported" if $self->private_net;
   if ($self->private_pid && (ref $args{code} ne 'CODE' || !$args{_run})) {
-    warn Dumper(\%args);
     croak "Private PID space requires a coderef to become the new PID 1";
   }
 }
@@ -85,7 +82,6 @@ sub post_setup {
 sub setup {
   my ($self, %args) = @_;
 
-  warn Dumper(\%args);
   my $uflags = $self->_uflags;
   $self->pre_setup(%args);
   
