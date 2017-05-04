@@ -1,5 +1,8 @@
 Revision history for Sys::Linux::Namespaces
 
+0.003 - TBD
+  * Fix language in docs
+
 0.002 - May  3 2017
   * Added a number of more namespace options
   * Corrected dependency on EUMM

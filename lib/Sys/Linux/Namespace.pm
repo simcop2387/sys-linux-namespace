@@ -162,17 +162,16 @@ This module requires your script to have CAP_SYS_ADMIN, usually by running as C<
 
 Construct a new Sys::Linux::Namespace object.  This collects all the options you want to enable, but does not engage them.
 
-=item C<setup>
+=head2 parameters
 
-Engage the namespaces.  Without a C<code> parameter it will alter the current process and place it whatever namespaces are configured.
-If called with a C<code> parameter, it will run the coderef in the namespace with a child process.  
-This method also accepts an overriding C<code> parameter so you can run multiple coderefs in a configured namespace without creating new objects.
+All parameters are passed in like a hash.
 
-=back
+=over 2
 
-=head1 OPTIONS
+=item C<code>
 
-=over 1
+A coderef to run when setting up the namespaces.  This gets run in a child process that's isolated from the parent.
+If you don't pass one in during construction or to C<setup> then the namespace changes will happen to the current process.
 
 =item C<private_mount>
 
@@ -207,6 +206,20 @@ Create a new UTS namespace.  This will let you safely change the hostname of the
 =item C<private_sysvsem>
 
 Create a new System V Semaphore namespace.  This will let you create new semaphores without anyone else touching them.
+
+=back
+
+=item C<setup>
+
+Engage the namespaces with all the configured options.
+
+=head2 parameters
+All parameters are passed by name like a hash.
+
+You may pass in a C<code> parameter to run in a child process, this overrides one provided during construction.
+
+Any other parameters are passed through to your coderef if present.
+
 
 =back
 
