@@ -2,11 +2,9 @@
 #include "EXTERN.h"         // globals/constant import locations
 #include "perl.h"           // Perl symbols, structures and constants definition
 #include "XSUB.h"           // xsubpp functions and macros
-#include <stdlib.h>         // rand()
+#include <sys/mount.h>
  
-// additional c code goes here
- 
-MODULE = Sys::Linux::Unshare  PACKAGE = Sys::Linux::Unshare
+MODULE = Sys::Linux::Mount  PACKAGE = Sys::Linux::Mount
 PROTOTYPES: ENABLE
  
  # XS code goes here
@@ -14,5 +12,12 @@ PROTOTYPES: ENABLE
  # XS comments begin with " #" to avoid them being interpreted as pre-processor
  # directives
  
-unsigned int
-rand()
+int 
+_unshare_sys(source, target, filesystem, mount, data)
+const char *source
+const char *target
+const char *filesystem
+unsigned long mountflags
+const char *data
+	CODE:
+	return mount(source, target, filesystem, mount, (const void *) data);

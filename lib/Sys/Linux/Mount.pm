@@ -5,12 +5,6 @@ use warnings;
 require Exporter;
 our @ISA = qw/Exporter/;
 
-BEGIN {
-  # Force reloading of all .ph files
-  delete $INC{$_} for (grep {/\.ph$/} keys %INC);
-  require 'syscall.ph';
-}
-
 my @mount_consts = qw/MS_RDONLY MS_NOSUID MS_NODEV MS_NOEXEC MS_SYNCHRONOUS MS_REMOUNT MS_MANDLOCK MS_DIRSYNC MS_NOATIME MS_NODIRATIME MS_BIND MS_MOVE MS_REC MS_SILENT MS_POSIXACL MS_UNBINDABLE MS_PRIVATE MS_SLAVE MS_SHARED MS_RELATIME MS_KERNMOUNT MS_I_VERSION MS_STRICTATIME MS_LAZYTIME MS_ACTIVE MS_NOUSER/;
 
 our @EXPORT_OK = (@mount_consts, qw/mount/);
