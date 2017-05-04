@@ -5,6 +5,7 @@ use warnings;
 use Data::Dumper;
 require Exporter;
 our @ISA = qw/Exporter/;
+use Carp qw/croak/;
 
 require XSLoader;
 
@@ -27,7 +28,7 @@ sub unshare {
     my $ret = _unshare_sys($flags);
 
     if ($ret != 0) {
-        die "unshare failed $ret $!";
+        croak "unshare failed $ret $!";
     }
 
     return;

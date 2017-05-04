@@ -9,7 +9,9 @@ use Sys::Linux::Unshare qw/:all/;
 use POSIX qw/_exit/;
 
 use Moo;
-use Carp qw/carp/;
+use Carp qw/croak/;
+
+use Data::Dumper;
 
 has no_proc => (is => 'rw');
 
@@ -22,7 +24,7 @@ sub _uflags {
   my $self = shift;
   my $uflags = 0;
 
-  $uflags |= CLONE_NEWNS if ($self->private_tmp || $self->private_mount);
+  $uflags |= CLONE_NEWNS if ($self->private_tmp || $self->private_mount || ($self->private_pid && !$self->no_proc));
   $uflags |= CLONE_NEWPID if ($self->private_pid);
   $uflags |= CLONE_NEWNET if ($self->private_net);
   $uflags |= CLONE_NEWIPC if ($self->private_ipc);
@@ -35,11 +37,11 @@ sub _uflags {
 
 sub _subprocess {
   my ($self, $code, %args) = @_;
-  die "_subprocess requires a CODE ref" unless ref $code eq 'CODE';
+  croak "_subprocess requires a CODE ref" unless ref $code eq 'CODE';
 
   my $pid = fork();
 
-  carp "Failed to fork: $!" if ($pid < 0);
+  croak "Failed to fork: $!" if ($pid < 0);
   if ($pid) {
     waitpid($pid, 0); # block and wait on child
     return $?;
@@ -52,16 +54,17 @@ sub _subprocess {
 sub pre_setup {
   my ($self, %args) = @_;
 
-  die "Private net is not yet supported" if $self->private_net;
+  croak "Private net is not yet supported" if $self->private_net;
   if ($self->private_pid && (ref $args{code} ne 'CODE' || !$args{_run})) {
-    die "Private PID space requires a coderef to become the new PID 1";
+    warn Dumper(\%args);
+    croak "Private PID space requires a coderef to become the new PID 1";
   }
 }
 
 sub post_setup {
   my ($self, %args) = @_;
   # If we want a private /tmp, or private mount we need to recursively make every mount private.  it CAN be done without that but this is more reliable.
-  if ($self->private_mount || $self->private_tmp) {
+  if ($self->private_tmp || $self->private_mount || ($self->private_pid && !$self->no_proc)) {
       mount("/", "/", undef, MS_REC|MS_PRIVATE, undef);
   }
 
@@ -69,21 +72,20 @@ sub post_setup {
     my $data = undef;
     $data = $self->private_tmp if (ref $self->private_tmp eq 'HASH');
 
-    eval {umount("/tmp")}; # ignore it if it wasn't mounted
-    mount("/tmp", "/tmp", "tmpfs", 0, undef);
-    mount("/tmp", "/tmp", "tmpfs", MS_PRIVATE, $data);
+    mount("none", "/tmp", "tmpfs", 0, undef);
+    mount("none", "/tmp", "tmpfs", MS_PRIVATE, $data);
   }
 
   if ($self->private_pid && !$self->no_proc) {
-    eval {umount("/proc")}; # ignore it if it wasn't mounted already
-    mount("/proc", "/proc", "proc", 0, undef);
-    mount("/proc", "/proc", "proc", MS_PRIVATE, undef);
+    mount("proc", "/proc", "proc", MS_MGC_VAL, undef);
+    mount("proc", "/proc", "proc", MS_PRIVATE|MS_REC, undef);
   }
 }
 
 sub setup {
   my ($self, %args) = @_;
 
+  warn Dumper(\%args);
   my $uflags = $self->_uflags;
   $self->pre_setup(%args);
   
@@ -99,9 +101,7 @@ sub run {
   my $code = $args{code};
   $args{_run} = 1;
 
-  carp "Run must be given a codref to run" unless ref $code eq "CODE";
-  my $uflags = $self->_uflags;
-  $self->pre_setup(%args);
+  croak "Run must be given a codref to run" unless ref $code eq "CODE";
 
   $self->_subprocess(sub {
     $self->setup(%args);
