@@ -1,5 +1,9 @@
 Revision history for Sys::Linux::Namespaces
 
+0.011 - May  4 2017
+  * Fix broken /proc mounting support
+  * Fixup tests to conform more to current BP
+
 0.010 - May  4 2017
   * More stable API
   * Added umount support to Sys::Linux::Mount
