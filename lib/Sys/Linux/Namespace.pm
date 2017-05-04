@@ -25,10 +25,12 @@ sub _uflags {
   $uflags |= CLONE_NEWNS if ($self->private_tmp || $self->private_mount);
   $uflags |= CLONE_NEWPID if ($self->private_pid);
   $uflags |= CLONE_NEWNET if ($self->private_net);
+
+  return $uflags;
 }
 
 sub _subprocess {
-  my ($self, $code, @args) = @_;
+  my ($self, $code, %args) = @_;
   die "_subprocess requires a CODE ref" unless ref $code eq 'CODE';
 
   my $pid = fork();
@@ -38,7 +40,7 @@ sub _subprocess {
     waitpid($pid, 0); # block and wait on child
     return $?;
   } else {
-    $code->(@args);
+    $code->(%args);
     _exit(0);
   }
 }
@@ -93,12 +95,12 @@ sub setup {
         $self->_subprocess(sub {
           $self->post_setup(%args);
           $code->(%args);
-        });
+        }, %args);
       } else {
         $self->post_setup(%args);
         $code->(%args);
       }
-    });
+    }, %args);
   } else {
     unshare($uflags);
     $self->post_setup(%args);
