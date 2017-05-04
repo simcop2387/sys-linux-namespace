@@ -152,7 +152,7 @@ Sys::Linux::Namespace - A Module for setting up linux namespaces
 
 =head1 REQUIREMENTS
 
-This module requires your script to either have CAP_SYS_ADMIN, usually by running as C<root>.  Without that it will fail to setup the namespaces and cause your program to exit.
+This module requires your script to have CAP_SYS_ADMIN, usually by running as C<root>.  Without that it will fail to setup the namespaces and cause your program to exit.
 
 =head1 METHODS
 
