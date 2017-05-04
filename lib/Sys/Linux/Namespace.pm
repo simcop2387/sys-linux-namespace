@@ -156,72 +156,64 @@ This module requires your script to have CAP_SYS_ADMIN, usually by running as C<
 
 =head1 METHODS
 
-=over 1
-
-=item C<new>
+=head2 C<new>
 
 Construct a new Sys::Linux::Namespace object.  This collects all the options you want to enable, but does not engage them.
 
-=head2 parameters
+All arguments are passed in like a hash.
 
-All parameters are passed in like a hash.
+=over 1
 
-=over 2
-
-=item C<code>
+=item code
 
 A coderef to run when setting up the namespaces.  This gets run in a child process that's isolated from the parent.
 If you don't pass one in during construction or to C<setup> then the namespace changes will happen to the current process.
 
-=item C<private_mount>
+=item private_mount
 
 Setup a private mount namespace, this makes every currently mounted filesystem private to our process.
 This means we can unmount and mount new filesystems without other processes seeing the mounts.
 
-=item C<private_tmp>
+=item private_tmp
 
 Sets up the private mount namespace as above, but also automatically sets up /tmp to be a clean private tmpfs mount.
 Takes either a true value, or a hashref with options to pass to the mount syscall.  See C<man 8 mount> for a list of possible options.
 
-=item C<private_pid>
+=item private_pid
 
 Create a private PID namespace.  This requires a C<code> parameter either to C<new()> or to C<setup()>
 
-=item C<private_net>
+=item private_net
 
 TODO This is not yet implemented.  Once done however, it will allow a child process to execute with a private network preventing communication.  Will require a C<code> parameter to C<new()> or C<setup>.
 
-=item C<private_ipc>
+=item private_ipc
 
 Create a private IPC namespace.
 
-=item C<private_user>
+=item private_user
 
 Create a new user namespace.  See C<man 7 user_namespaces> for more information.
 
-=item C<private_uts>
+=item private_uts
 
 Create a new UTS namespace.  This will let you safely change the hostname of the system without affect anyone else.
 
-=item C<private_sysvsem>
+=item private_sysvsem
 
 Create a new System V Semaphore namespace.  This will let you create new semaphores without anyone else touching them.
 
 =back
 
-=item C<setup>
+=head2 C<setup>
 
 Engage the namespaces with all the configured options.
 
-=head2 parameters
-All parameters are passed by name like a hash.
+All arguments are passed by name like a hash.
 
 You may pass in a C<code> parameter to run in a child process, this overrides one provided during construction.
 
 Any other parameters are passed through to your coderef if present.
-
-
-=back
 
 =head1 AUTHOR
 
