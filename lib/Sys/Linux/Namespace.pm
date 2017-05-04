@@ -1,4 +1,5 @@
 package Sys::Linux::Namespace;
+# ABSTRACT: Sets up linux kernel namespaces
 
 use strict;
 use warnings;

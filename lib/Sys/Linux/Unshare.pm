@@ -6,6 +6,10 @@ use Data::Dumper;
 require Exporter;
 our @ISA = qw/Exporter/;
 
+require XSLoader;
+
+XSLoader::load();
+
 BEGIN {
   # Force reloading of all .ph files
   delete $INC{$_} for (grep {/\.ph$/} keys %INC);
