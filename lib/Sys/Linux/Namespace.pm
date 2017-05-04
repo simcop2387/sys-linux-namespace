@@ -11,10 +11,10 @@ use POSIX qw/_exit/;
 use Moo;
 use Carp qw/carp/;
 
-has private_tmp   => (is => 'rw');
-has private_mount => (is => 'rw');
-has private_pid   => (is => 'rw');
-has private_net   => (is => 'rw');
+for my $p (qw/tmp mount pid net ipc user uts sysvsem/) {
+  my $pp = "private_$p";
+  has $pp => (is => 'rw');
+}
 
 has code => (is => 'rw'); # code to run in the namespace
 
@@ -25,6 +25,10 @@ sub _uflags {
   $uflags |= CLONE_NEWNS if ($self->private_tmp || $self->private_mount);
   $uflags |= CLONE_NEWPID if ($self->private_pid);
   $uflags |= CLONE_NEWNET if ($self->private_net);
+  $uflags |= CLONE_NEWIPC if ($self->private_ipc);
+  $uflags |= CLONE_NEWUSER if ($self->private_user);
+  $uflags |= CLONE_NEWUTS if ($self->private_uts);
+  $uflags |= CLONE_SYSVSEM if ($self->private_sysvsem);
 
   return $uflags;
 }
@@ -187,6 +191,22 @@ Create a private PID namespace.  This requires a C<code> parameter either to C<n
 =item C<private_net>
 
 TODO This is not yet implemented.  Once done however, it will allow a child process to execute with a private network preventing communication.  Will require a C<code> parameter to C<new()> or C<setup>.
+
+=item C<private_ipc>
+
+Create a private IPC namespace.
+
+=item C<private_user>
+
+Create a new user namespace.  See C<man 7 user_namespaces> for more information.
+
+=item C<private_uts>
+
+Create a new UTS namespace.  This will let you safely change the hostname of the system without affect anyone else.
+
+=item C<private_sysvsem>
+
+Create a new System V Semaphore namespace.  This will let you create new semaphores without anyone else touching them.
 
 =back
 
