@@ -15,7 +15,7 @@ PROTOTYPES: ENABLE
 SV *_mount_sys(const char *source, const char *target, const char *filesystem, unsigned long mountflags, const char *data)
 	CODE:
 	ST(0) = sv_newmortal();
-	sv_setiv(ST(0), mount(source, target, filesystem, mountflags, NULL));
+	sv_setiv(ST(0), mount(source, target, filesystem, mountflags, (void *) data));
 
 SV *_umount_sys(const char *target)
 	CODE:

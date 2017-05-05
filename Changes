@@ -1,5 +1,8 @@
 Revision history for Sys::Linux::Namespaces
 
+0.012 - May  4 2017
+  * Fix borken mount options
+
 0.011 - May  4 2017
   * Fix broken /proc mounting support
   * Fixup tests to conform more to current BP
