@@ -20,3 +20,7 @@ SV * _unshare_sys(int flags)
 	ST(0) = sv_newmortal();
 	sv_setiv(ST(0), unshare(flags));
 
+SV * _clone_sys(int flags)
+	CODE:
+	ST(0) = sv_newmortal();
+	sv_setiv(ST(0), clone(NULL, NULL, CLONE_CHILD_CLEARTID|SIGCHLD|flags, NULL));

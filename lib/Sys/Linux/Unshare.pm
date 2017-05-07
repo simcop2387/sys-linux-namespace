@@ -20,9 +20,20 @@ our %EXPORT_TAGS = (
     'all' => [@unshare_consts, qw/unshare/],
 );
 
+sub clone {
+  my ($flags) = @_;
+  local $! = 0;
+  my $ret_pid = _clone_sys($flags);
+
+  if ($ret_pid < 0) {
+    croak "Clone call failed: $ret_pid $!";
+  }
+
+  return $ret_pid;
+}
+
 sub unshare {
     my ($flags) = @_;
-
 
     local $! = 0;
     my $ret = _unshare_sys($flags);
