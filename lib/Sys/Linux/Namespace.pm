@@ -5,13 +5,24 @@ use strict;
 use warnings;
 
 use Sys::Linux::Mount qw/:all/;
-use Sys::Linux::Unshare qw/:all/;
+#use Sys::Linux::Unshare qw/:all/;
+use Linux::Clone;
 use POSIX qw/_exit/;
+use Time::HiRes qw/sleep/;
 
 use Moo;
 use Carp qw/croak/;
 
 has no_proc => (is => 'rw');
+has term_child => (is => 'rw', default => 1);
+
+our $debug = 0;
+sub debug {
+  print STDERR @_ if $debug;
+}
+
+our $VERSION = v0.013;
+my @signames = keys %SIG; # capture before anyone has probably localized it.
 
 for my $p (qw/tmp mount pid net ipc user uts sysvsem/) {
   my $pp = "private_$p";
@@ -22,13 +33,13 @@ sub _uflags {
   my $self = shift;
   my $uflags = 0;
 
-  $uflags |= CLONE_NEWNS if ($self->private_tmp || $self->private_mount || ($self->private_pid && !$self->no_proc));
-  $uflags |= CLONE_NEWPID if ($self->private_pid);
-  $uflags |= CLONE_NEWNET if ($self->private_net);
-  $uflags |= CLONE_NEWIPC if ($self->private_ipc);
-  $uflags |= CLONE_NEWUSER if ($self->private_user);
-  $uflags |= CLONE_NEWUTS if ($self->private_uts);
-  $uflags |= CLONE_SYSVSEM if ($self->private_sysvsem);
+  $uflags |= Linux::Clone::NEWNS if ($self->private_tmp || $self->private_mount || ($self->private_pid && !$self->no_proc));
+  $uflags |= Linux::Clone::NEWPID if ($self->private_pid);
+  $uflags |= Linux::Clone::NEWNET if ($self->private_net);
+  $uflags |= Linux::Clone::NEWIPC if ($self->private_ipc);
+  $uflags |= Linux::Clone::NEWUSER if ($self->private_user);
+  $uflags |= Linux::Clone::NEWUTS if ($self->private_uts);
+  $uflags |= Linux::Clone::SYSVSEM if ($self->private_sysvsem);
 
   return $uflags;
 }
@@ -37,16 +48,29 @@ sub _subprocess {
   my ($self, $code, %args) = @_;
   croak "_subprocess requires a CODE ref" unless ref $code eq 'CODE';
 
-  my $pid = fork();
+  debug "Forking\n";
+  my $pid = Linux::Clone::clone (sub {
+    local $$ = POSIX::getpid(); # try to fix up $$ if we can.
+    local %SIG = map {$_ => sub {debug "Got signal in $$, exiting"; _exit(0)}} @signames;
+    debug "Inside Child $$\n";
+    
+    $code->(%args);
+    _exit(0); # always exit with 0
+  }, 0, POSIX::SIGCHLD | $self->_uflags);
 
   croak "Failed to fork: $!" if ($pid < 0);
-  if ($pid) {
-    waitpid($pid, 0); # block and wait on child
-    return $?;
-  } else {
-    $code->(%args);
-    _exit(0);
-  }
+
+  my $sighandler =   
+  local %SIG = map {my $q=$_; $q => sub {
+      debug "got signal $q in $$\n";
+      kill 'TERM', $pid;
+      sleep(0.2);
+      kill 'KILL', $pid;
+      kill 'KILL', $pid;
+  }} ($self->term_child ? @signames : ());
+
+  waitpid($pid, 0);
+  return $? 
 }
 
 sub pre_setup {
@@ -85,7 +109,7 @@ sub setup {
   my $uflags = $self->_uflags;
   $self->pre_setup(%args);
   
-  unshare($uflags);
+  Linux::Clone::unshare($uflags);
   $self->post_setup(%args);
 
   return 1;
@@ -99,21 +123,10 @@ sub run {
 
   croak "Run must be given a codref to run" unless ref $code eq "CODE";
 
+  $self->pre_setup(%args);
   $self->_subprocess(sub {
-    $self->pre_setup(%args);
-    my $uflags = $self->_uflags;
-    unshare($uflags);
-
-    # We've just unshared, if we wanted a private pid space we MUST fork again.
-    if ($self->private_pid) {
-      $self->_subprocess(sub {
-        $self->post_setup(%args);
-        $code->(%args);
-      }, %args);
-    } else {
-      $self->setup(%args);
-      $code->(%args);
-    }
+    $self->post_setup(%args);
+    $code->(%args);
   }, %args);
 
   return 1;
@@ -185,6 +198,10 @@ Takes either a true value, or a hashref with options to pass to the mount syscal
 Create a private PID namespace.  This requires the use of C<< ->run() >>.
 This requires a C<code> parameter either to C<new()> or to C<setup()>
 Also sets up a private /proc mount by default
+
+=item term_child
+
+Send a term signal to the child process on any signal, followed shortly by a kill signal.  This is the default behavior to prevent zombied processes.
 
 =item no_proc
 
