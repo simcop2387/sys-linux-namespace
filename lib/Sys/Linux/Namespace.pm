@@ -124,12 +124,10 @@ sub run {
   croak "Run must be given a codref to run" unless ref $code eq "CODE";
 
   $self->pre_setup(%args);
-  $self->_subprocess(sub {
+  return $self->_subprocess(sub {
     $self->post_setup(%args);
     $code->(%args);
   }, %args);
-
-  return 1;
 }
 
 1;
