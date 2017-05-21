@@ -36,7 +36,7 @@ SKIP: {
   alarm(5);
   $pid_ns->run(code => sub {
     is($$, 1, "Second alarmed init");
-    
+  
     my $pid = fork();
 
     isnt($pid, undef, "Fork succeeded");
