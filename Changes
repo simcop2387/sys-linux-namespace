@@ -1,5 +1,8 @@
 Revision history for Sys::Linux::Namespaces
 
+0.016 - June 22 2018
+  * Update some documentation because I forgot how this worked
+
 0.015 - May 21 2017
   * Remove a few hacks for signals inside the child that aren't needed since using Linux::Clone instead of unshare only
 
