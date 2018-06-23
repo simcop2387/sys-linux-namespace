@@ -126,7 +126,7 @@ All of these functions closely mirror the calling convetions and options of the 
 Mount a filesystem, mostly mirrors the setup for the syscall, taking in flags as a bitwise combination of C<MS_*> constants.  
 C<MS_MGC_VAL> is the magic value to say you have no flags.
 
-options should be a hashref containing the options to give filesystem specific options, things like C<{uid =E<rt> "nobody", gid =E<rt> "nogroup"}> for mounting CIFS filesystems.
+options should be a hashref containing the options to give filesystem specific options, things like C<<{uid => "nobody", gid => "nogroup"}>> for mounting CIFS filesystems.
 These are typically the things you'd see in C<mount -o uid=nobody,gid=nogroup,...> except for a few like MS_NOATIME or MS_NODEV that aren't filesystem specific.
 
 =head2 C<umount>
