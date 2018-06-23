@@ -84,7 +84,7 @@ sub umount {
     $ret = _umount_sys($target);
   }
 
-  if ($ret != 0) {Engage the namespaces with all the configured options.  This does not fork, and affects the existing process.  The changes cannot be undone.
+  if ($ret != 0) {
     croak "umount failed: $ret $!";
   }
 
