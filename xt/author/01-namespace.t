@@ -7,13 +7,14 @@ use Test::SharedFork;
 
 use Sys::Linux::Namespace;
 # $Sys::Linux::Namespace::debug = 1;
-unless $ENV{UNSAFE_USER_NAMESPACES} eq 'I KNOW WHAT I AM DOING' {
-  skip "Need permission to run test", 5 
-} else {
+
+SKIP: {
+  skip "Need permission to run test", 5  unless ($ENV{UNSAFE_USER_NAMESPACES} eq 'I KNOW WHAT I AM DOING');
+
   ok(my $namespace = Sys::Linux::Namespace->new(private_user => 1, private_tmp => 1), "Setup object");
 
   my $ret = $namespace->run(code => sub {
-    ok($<, 0, "Am root inside container");
+    is($<, 0, "Am root inside container");
     is_deeply([glob "/tmp/*"], [], "No files present in /tmp");
   });
 
