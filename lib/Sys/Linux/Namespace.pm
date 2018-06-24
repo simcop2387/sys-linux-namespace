@@ -21,7 +21,7 @@ sub debug {
   print STDERR @_ if $debug;
 }
 
-our $VERSION = "0.016";
+our $VERSION = '0.017';
 my @signames = grep {!/^__/} keys %SIG; # capture before anyone has probably localized it.
 
 for my $p (qw/tmp mount pid net ipc user uts sysvsem/) {
